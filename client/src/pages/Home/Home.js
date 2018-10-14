@@ -1,27 +1,24 @@
 import React, { Component } from "react";
 import API from "../../utils/API";
-// import { Link } from "react-router-dom";
 import { Col, Row, Container } from "../../components/Grid"
-import { Input } from "../../components/Form"
+import { Input, FormBtn, SaveBtn } from "../../components/Form"
 import Jumbotron from "../../components/Jumbotron"
+import { ArticleList, ArticleListItem } from "../../components/List"
 
-class Articles extends Component {
+class Home extends Component {
     state = {
         articles: [],
         title: "",
-        date: "",
-        url: ""
+        beginDate: "",
+        endDate: "",
     };
 
-    componentDidMount() {
-        this.loadArticles();
-    }
-
-    loadArticles = () => {
-        API.getArticles()
-            .then(res =>
-                this.setState({ articles: res.data, title: "", date: "", url: "" })
-            )
+    handleFormSubmit = () => {
+        API.getArticles(this.state.title, this.state.beginDate, this.state.endDate)
+            .then(res => {
+                this.setState({ articles: res.data, title: "", beginDate: "", endDate: "" })
+                console.log(this.state.articles)
+            })
             .catch(err => console.log(err));
     };
 
@@ -32,7 +29,7 @@ class Articles extends Component {
         });
     };
 
-    handleFromSubmit = event => {
+    handleSaveSubmit = event => {
         event.preventDefault();
         if (this.state.title) {
             API.saveArticle({
@@ -65,15 +62,40 @@ class Articles extends Component {
                                 value={this.state.beginDate}
                                 onChange={this.handleInputChange}
                                 name="beginDate"
-                                placeholder="Start Date"
+                                placeholder="Start Year"
                             />
                             <Input
                                 value={this.state.endDate}
                                 onChange={this.handleInputChange}
                                 name="endDate"
-                                placeholder="End Date"
+                                placeholder="End Year"
                             />
+                            <FormBtn
+                                disabled={!this.state.title}
+                                onClick={this.handleFormSubmit}
+                            >
+                                Search for Articles
+                            </FormBtn>
                         </form>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col size="md-12">
+                    {this.state.articles.length ? (
+                        <ArticleList>
+                            {this.state.articles.map(article => (
+                                <ArticleListItem 
+                                    key={article.headline.main}
+                                    title={article.headline.main}
+                                    href={article.web_url}
+                                >
+                                    <SaveBtn onClick={() => this.handleSaveSubmit(article)} />
+                                </ArticleListItem>
+                            ))}
+                        </ArticleList>
+                    ) : (
+                        <h3>No Result to Display</h3> 
+                    )}
                     </Col>
                 </Row>
             </Container>
@@ -81,4 +103,4 @@ class Articles extends Component {
     }
 }
 
-export default Articles;
+export default Home;

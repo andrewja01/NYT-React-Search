@@ -1,8 +1,8 @@
 import React from "react";
 import { Container, Row, Col } from "../Grid";
 
-// RecipeListItem renders a bootstrap list item containing data from the recipe api call
-export const RecipeListItem = props => (
+//renders a bootstrap list item containing data from the NYT api call
+export const ArticleListItem = props => (
   <li className="list-group-item">
     <Container>
       <Row>
