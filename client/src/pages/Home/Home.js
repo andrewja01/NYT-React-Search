@@ -13,10 +13,18 @@ class Home extends Component {
         endDate: "",
     };
 
-    handleFormSubmit = () => {
+    getSavedArticles = () => {
+        API.getSavedArticles()
+            .then((res) => {
+                this.setState({ articles: res.data })
+            })
+    }
+
+    handleFormSubmit = event => {
+        event.preventDefault();
         API.getArticles(this.state.title, this.state.beginDate, this.state.endDate)
             .then(res => {
-                this.setState({ articles: res.data, title: "", beginDate: "", endDate: "" })
+                this.setState({ articles: res.data.response.docs })
                 console.log(this.state.articles)
             })
             .catch(err => console.log(err));
@@ -29,18 +37,12 @@ class Home extends Component {
         });
     };
 
-    handleSaveSubmit = event => {
-        event.preventDefault();
-        if (this.state.title) {
-            API.saveArticle({
-                title: this.state.title,
-                date: this.state.date,
-                url: this.state.url
-            })
-                .then(res => this.loadArticles())
+    handleSaveSubmit = id => {
+            const article = this.state.articles.find(article => article._id === id);
+            API.saveArticle(article)
+                .then(res => this.getSavedArticles())
                 .catch(err => console.log(err));
-        }
-    }
+        };
 
     render() {
         return (
@@ -52,18 +54,21 @@ class Home extends Component {
                             <h6>Search for an Article</h6>
                         </Jumbotron>
                         <form>
+                            <label htmlFor="Title">Title: </label>
                             <Input
                                 value={this.state.title}
                                 onChange={this.handleInputChange}
                                 name="title"
                                 placeholder="Title (required)"
                             />
+                             <label htmlFor="Start Year">Start Year: </label>
                             <Input
                                 value={this.state.beginDate}
                                 onChange={this.handleInputChange}
                                 name="beginDate"
                                 placeholder="Start Year"
                             />
+                            <label htmlFor="End Year">End Year: </label>
                             <Input
                                 value={this.state.endDate}
                                 onChange={this.handleInputChange}
@@ -87,9 +92,11 @@ class Home extends Component {
                                 <ArticleListItem 
                                     key={article.headline.main}
                                     title={article.headline.main}
-                                    href={article.web_url}
+                                    url={article.web_url}
+                                    date={article.pub_date}
+                                    handleSaveSubmit={this.handleSaveSubmit}
                                 >
-                                    <SaveBtn onClick={() => this.handleSaveSubmit(article)} />
+
                                 </ArticleListItem>
                             ))}
                         </ArticleList>
